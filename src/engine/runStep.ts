@@ -2,6 +2,7 @@ import { StepAction } from '../enums/StepAction';
 import { StepOutcomeKind } from '../enums/StepOutcomeKind';
 import { TourMode } from '../enums/TourMode';
 import { isForbiddenClick } from '../dom/forbidden';
+import { isToggleControl } from '../dom/clickTarget';
 import { centreOf, dispatchClick, typeValue } from '../dom/pointer';
 import { accessibleName, substitute } from '../dom/text';
 import { waitForTarget } from '../dom/waitForTarget';
@@ -42,7 +43,7 @@ async function perform(context: StepRunContext, node: Element): Promise<StepOutc
   }
   if (step.action !== StepAction.Click || !acts) return ready(node, false);
   const name = accessibleName(node);
-  if (isForbiddenClick(name, context.allowSave)) return { kind: StepOutcomeKind.Refused, node, name };
+  if (!isToggleControl(node) && isForbiddenClick(name, context.allowSave)) return { kind: StepOutcomeKind.Refused, node, name };
   const point = centreOf(node);
   await context.moveCursor(point);
   if (context.isCancelled()) return CANCELLED;

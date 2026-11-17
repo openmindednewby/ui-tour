@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- A switch, checkbox or radio is a setting, so the write-control rule no longer refuses it: "Pay in a different currency" toggles, a "Pay" button is still never clicked.
+
 ## 1.0.1
 
 - Show me and Auto clicks reach the control a real pointer would hit: a React Native Web switch or checkbox wrapper now toggles its input instead of swallowing the click.

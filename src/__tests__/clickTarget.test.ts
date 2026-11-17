@@ -1,4 +1,4 @@
-import { clickTarget } from '../dom/clickTarget';
+import { clickTarget, isToggleControl } from '../dom/clickTarget';
 import { dispatchClick } from '../dom/pointer';
 
 const POINT = { x: 10, y: 10 };
@@ -44,5 +44,26 @@ describe('dispatchClick', () => {
     dispatchClick(wrapper, POINT);
 
     expect(input.checked).toBe(true);
+  });
+});
+
+describe('isToggleControl', () => {
+  it('with a row wrapping a switch named Pay in a different currency, returns true so the tour may toggle it', () => {
+    const { wrapper } = switchWrapper();
+    wrapper.setAttribute('aria-label', 'Pay in a different currency');
+
+    const toggle = isToggleControl(wrapper);
+
+    expect(toggle).toBe(true);
+  });
+
+  it('with a Pay button, returns false so the write-control rule still applies', () => {
+    const button = document.createElement('button');
+    button.textContent = 'Pay';
+    document.body.appendChild(button);
+
+    const toggle = isToggleControl(button);
+
+    expect(toggle).toBe(false);
   });
 });
