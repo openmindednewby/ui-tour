@@ -58,7 +58,7 @@
         "node": ">=18.0.0"
     },
     "scripts": {
-        "build": "rimraf dist && tsup",
+        "build": "npm run clean && tsup",
         "build:watch": "tsup --watch",
         "test": "jest",
         "test:watch": "jest --watch",
@@ -66,7 +66,7 @@
         "lint": "eslint src --ext .ts,.tsx",
         "lint:fix": "eslint src --ext .ts,.tsx --fix",
         "typecheck": "tsc --noEmit",
-        "clean": "rimraf dist",
+        "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
         "security:audit": "npm audit --audit-level=high",
         "deps:outdated": "npm outdated || exit 0",
         "deps:unused": "npx depcheck --ignores \"@types/jest,@types/node,@types/react,@types/react-dom,rimraf,react-native,react-native-web\"",
