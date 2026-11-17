@@ -1,4 +1,5 @@
 import type { Point, TargetRect } from '../types';
+import { clickTarget } from './clickTarget';
 import { sleep } from './waitForTarget';
 
 export function rectOf(node: Element): TargetRect {
@@ -11,15 +12,22 @@ export function centreOf(node: Element): Point {
   return { x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + rect.height / 2) };
 }
 
+const CHECKABLE_TYPES = new Set(['checkbox', 'radio']);
+
 function isTextField(node: Element): node is HTMLInputElement | HTMLTextAreaElement {
-  return node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement;
+  return (node instanceof HTMLInputElement && !CHECKABLE_TYPES.has(node.type)) || node instanceof HTMLTextAreaElement;
 }
 
 function pointerEvent(type: string, init: PointerEventInit): MouseEvent {
   return typeof window.PointerEvent === 'function' ? new window.PointerEvent(type, init) : new MouseEvent(type, init);
 }
 
-export function dispatchClick(node: Element, point: Point): void {
+export function dispatchClick(target: Element, point: Point): void {
+  if (isTextField(target)) {
+    target.focus();
+    return;
+  }
+  const node = clickTarget(target, point);
   if (isTextField(node)) {
     node.focus();
     return;
