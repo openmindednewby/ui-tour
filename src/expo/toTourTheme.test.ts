@@ -104,4 +104,28 @@ describe('toTourTheme contrast', () => {
 
     expect(tour.onAccent).toBe('rgb(30,25,34)');
   });
+
+  it('with kefi dark colours and no mode, treats the theme as dark and dims with the background', () => {
+    const theme: AppThemeSource = { colors: { background: '#141018', surface: '#1e1922', surfaceElevated: '#282130', text: '#f7f3ec', textSecondary: '#b3aab8', border: 'rgba(255, 255, 255, .10)' }, palette: { primary: { '300': '#f2a65a', '700': '#8a3b12' } } };
+
+    const tour = toTourTheme(theme);
+
+    expect([tour.accent, tour.scrim]).toEqual(['#f2a65a', 'color-mix(in srgb, #141018 62%, transparent)']);
+  });
+
+  it('with mode light but a darker background than text, dims with the darker background', () => {
+    const theme: AppThemeSource = { ...base, mode: 'light', colors: { ...base.colors, background: '#101010', text: '#e0e0e0' } };
+
+    const tour = toTourTheme(theme, false);
+
+    expect(tour.scrim).toBe('color-mix(in srgb, #101010 62%, transparent)');
+  });
+
+  it('with a light background and dark text, dims with the text', () => {
+    const theme: AppThemeSource = { ...base, colors: { ...base.colors, background: '#faf7f2', text: '#1a1a1a' } };
+
+    const tour = toTourTheme(theme);
+
+    expect(tour.scrim).toBe('color-mix(in srgb, #1a1a1a 62%, transparent)');
+  });
 });

@@ -2,6 +2,7 @@ import { fontStack } from '@dloizides/ui-tour';
 import type { TourTheme } from '@dloizides/ui-tour';
 
 import { pickAccentText, pickOnAccent } from './accentInk';
+import { luminance } from './contrast';
 
 export interface AppThemeColors {
   background: string;
@@ -23,14 +24,27 @@ export interface AppThemeSource {
 const DARK_MODE = 'dark';
 const TOUR_RADIUS = 12;
 const SCRIM_STRENGTH = '62%';
+const DARK_BACKGROUND_LUMINANCE = 0.2;
+
+function hasDarkBackground(background: string): boolean {
+  const value = luminance(background);
+  return value !== undefined && value < DARK_BACKGROUND_LUMINANCE;
+}
+
+function darkerOf(text: string, background: string, fallback: string): string {
+  const textLuminance = luminance(text);
+  const backgroundLuminance = luminance(background);
+  if (textLuminance === undefined || backgroundLuminance === undefined) return fallback;
+  return backgroundLuminance < textLuminance ? background : text;
+}
 
 /** Maps an app theme (theme-web `ResolvedTheme` or ui-feedback theme) onto the tour colour slots. */
 export function toTourTheme(theme: AppThemeSource, dark?: boolean): TourTheme {
-  const isDark = dark ?? theme.mode === DARK_MODE;
+  const isDark = dark ?? (theme.mode === DARK_MODE || hasDarkBackground(theme.colors.background));
   const { colors, palette } = theme;
   const lightAccent = palette.primary['700'] ?? palette.primary['600'] ?? palette.primary['500'] ?? colors.text;
   const accent = isDark ? palette.primary['300'] ?? colors.text : lightAccent;
-  const shade = isDark ? colors.background : colors.text;
+  const shade = darkerOf(colors.text, colors.background, isDark ? colors.background : colors.text);
   const surface = colors.surfaceElevated ?? colors.surface;
   return {
     accent,
