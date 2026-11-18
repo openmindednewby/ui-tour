@@ -6,6 +6,7 @@ interface Frame {
   step?: number;
   steps?: number;
   skip?: boolean;
+  vanishOnRead?: boolean;
 }
 
 function fakePage(ids: string[], frames: Frame[]): TourPage {
@@ -26,6 +27,7 @@ function fakePage(ids: string[], frames: Frame[]): TourPage {
     },
     getAttribute: async (name: string) => {
       if (name === 'data-testid') return `tour-start-${ids[nth]}-auto`;
+      if (frame().vanishOnRead === true) throw new Error('Timeout 250ms exceeded');
       return String(name === 'data-tour-step' ? frame().step : frame().steps);
     },
     nth: (position: number) => locator(selector, position),
@@ -53,6 +55,14 @@ describe('tourFailure', () => {
 describe('playAllToursInAuto', () => {
   it('when the caption walks every step and closes, passes the tour', async () => {
     const page = fakePage(['payees'], [{ step: 1, steps: 2 }, { step: 2, steps: 2 }, {}, {}]);
+
+    const results = await playAllToursInAuto(page, { pollMs: 1 });
+
+    expect(results).toEqual([{ tourId: 'payees', passed: true, step: 2, steps: 2 }]);
+  });
+
+  it('when the caption unmounts between the count and the attribute read, keeps polling and passes', async () => {
+    const page = fakePage(['payees'], [{ step: 1, steps: 2 }, { step: 1, steps: 2, vanishOnRead: true }, { step: 2, steps: 2 }, {}, {}]);
 
     const results = await playAllToursInAuto(page, { pollMs: 1 });
 

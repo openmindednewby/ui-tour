@@ -3,7 +3,7 @@ import type { TourRunFailure } from './TourRunFailure';
 export interface TourLocator {
   count(): Promise<number>;
   click(): Promise<void>;
-  getAttribute(name: string): Promise<string | null>;
+  getAttribute(name: string, options?: { timeout?: number }): Promise<string | null>;
   nth(index: number): TourLocator;
   first(): TourLocator;
 }

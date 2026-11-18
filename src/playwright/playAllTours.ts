@@ -11,6 +11,7 @@ const SKIP = '[data-testid="tour-skip"]';
 const GONE_POLLS = 2;
 const DEFAULT_STEP_TIMEOUT_MS = 30000;
 const DEFAULT_POLL_MS = 250;
+const READ_TIMEOUT_MS = 250;
 
 interface RunState {
   seen: boolean;
@@ -55,6 +56,16 @@ function result(tourId: string, state: RunState, reason?: TourRunFailure): TourR
   return { tourId, passed: false, step: state.step, steps: state.steps, reason, message: tourFailure(tourId, state.step, state.steps, reason) };
 }
 
+/** Reads a numeric caption attribute; null when the caption unmounted between the count and the read. */
+async function readNumber(page: TourPage, name: string): Promise<number | null> {
+  try {
+    const value = await page.locator(CAPTION).first().getAttribute(name, { timeout: READ_TIMEOUT_MS });
+    return value === null ? null : Number(value);
+  } catch {
+    return null;
+  }
+}
+
 async function observe(page: TourPage, tourId: string, state: RunState, timeoutMs: number): Promise<TourRunResult | null> {
   const caption = page.locator(CAPTION);
   if ((await caption.count()) === 0) {
@@ -64,8 +75,10 @@ async function observe(page: TourPage, tourId: string, state: RunState, timeoutM
     return state.step === state.steps ? result(tourId, state) : result(tourId, state, TourRunFailure.ClosedEarly);
   }
   state.gonePolls = 0;
-  const step = Number(await caption.getAttribute('data-tour-step'));
-  state.steps = Number(await caption.getAttribute('data-tour-steps'));
+  const step = await readNumber(page, 'data-tour-step');
+  const steps = await readNumber(page, 'data-tour-steps');
+  if (step === null || steps === null) return null;
+  state.steps = steps;
   if (!state.seen || step !== state.step) {
     state.seen = true;
     state.step = step;
