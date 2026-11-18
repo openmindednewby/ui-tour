@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3
+
+- `toTourTheme` dark accent is the first of primary 300, 400, 500, base that exists, then the text colour. Fixes kefi dark (toUiTheme primary has only 100/500/700) showing a cream Next button and ring instead of coral.
+
 ## 1.2.2
 
 - `toTourTheme` treats a theme as dark when its `mode` is `dark` or its background luminance is below 0.2 (design-tokens `toUiTheme` sets no `mode`), and the scrim dims with the darker of text and background. Fixes the light-grey dimmed page behind a tour in kefi dark.
