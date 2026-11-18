@@ -1,3 +1,4 @@
+import { fontStack } from '../fontStack';
 import type { CSSProperties } from 'react';
 import { LAYER_Z, MIN_HIT, RING_PADDING } from '../constants';
 import type { Position } from '../dom/placement';
@@ -38,7 +39,7 @@ export function captionStyle(theme: TourTheme, position: Position): CSSPropertie
     border: `1px solid ${theme.accent}`,
     borderRadius: theme.radius,
     padding: '14px 16px',
-    fontFamily: theme.fontFamily,
+    fontFamily: fontStack(theme.fontFamily),
     fontSize: 16,
     lineHeight: 1.4,
     overflowWrap: 'anywhere',
@@ -67,7 +68,7 @@ export function buttonStyle(theme: TourTheme, primary: boolean): CSSProperties {
     border: `1px solid ${theme.accent}`,
     background: primary ? theme.accent : 'transparent',
     color: primary ? theme.onAccent : theme.onSurface,
-    fontFamily: theme.fontFamily,
+    fontFamily: fontStack(theme.fontFamily),
     fontSize: 14,
     fontWeight: 600,
     cursor: 'pointer',

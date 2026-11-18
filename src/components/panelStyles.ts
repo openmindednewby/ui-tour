@@ -1,3 +1,4 @@
+import { fontStack } from '../fontStack';
 import type { CSSProperties } from 'react';
 import { LAYER_Z, MIN_HIT } from '../constants';
 import type { TourTheme } from '../types';
@@ -17,7 +18,7 @@ export function panelStyle(theme: TourTheme): CSSProperties {
     boxSizing: 'border-box',
     maxHeight: '90vh',
     overflow: 'auto',
-    fontFamily: theme.fontFamily,
+    fontFamily: fontStack(theme.fontFamily),
     fontSize: 15,
     lineHeight: 1.4,
   };
@@ -43,7 +44,7 @@ export function groupButtonStyle(theme: TourTheme): CSSProperties {
     marginTop: 8,
     padding: '12px 0',
     color: theme.accent,
-    fontFamily: theme.fontFamily,
+    fontFamily: fontStack(theme.fontFamily),
     fontSize: 16,
     fontWeight: 700,
     cursor: 'pointer',
@@ -67,7 +68,7 @@ export function offerStyle(theme: TourTheme): CSSProperties {
     border: `1px solid ${theme.accent}`,
     borderRadius: theme.radius,
     padding: 16,
-    fontFamily: theme.fontFamily,
+    fontFamily: fontStack(theme.fontFamily),
     fontSize: 15,
     lineHeight: 1.4,
   };

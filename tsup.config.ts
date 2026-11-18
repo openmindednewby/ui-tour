@@ -1,7 +1,12 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: {
+    index: 'src/index.ts',
+    'expo/index': 'src/expo/index.ts',
+    'testing/index': 'src/testing/index.ts',
+    'playwright/index': 'src/playwright/index.ts',
+  },
   format: ['cjs', 'esm'],
   dts: true,
   splitting: false,
@@ -11,5 +16,5 @@ export default defineConfig({
   minify: false,
   target: 'es2020',
   outDir: 'dist',
-  external: ['react', 'react-dom', 'react-native', 'react-dom/client'],
+  external: ['react', 'react-dom', 'react-native', 'react-dom/client', 'expo-router', '@dloizides/ui-tour'],
 });

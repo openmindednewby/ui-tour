@@ -65,7 +65,7 @@ A step target is a testID string (`data-testid`) or `{ role, name, nth?, exact?,
 
 Every colour comes from the `theme` prop; map it from your design tokens or tenant theme:
 
-`accent`, `onAccent`, `surface`, `onSurface`, `muted`, `scrim`, `divider`, `radius`, `fontFamily`.
+`accent`, `onAccent`, `surface`, `onSurface`, `muted`, `scrim`, `divider`, `radius`, `fontFamily`. The font always falls back to `sans-serif` (`fontStack`).
 
 ### Events
 
@@ -74,6 +74,72 @@ Every colour comes from the `theme` prop; map it from your design tokens or tena
 ### Routes and reload
 
 Steps with a `route` call your `navigate` (never a full page load). The tour state lives in `sessionStorage`, so a reload resumes the same step. A missing target is awaited for 8 s; an `optional` step is then skipped, a required one shows "This step isn't available here" with Skip and End.
+
+## Adopt tours in an Expo Router app (`@dloizides/ui-tour/expo`)
+
+One provider line in the root layout. Router navigation, theme (light/dark), translated labels, Umami events, the picker, F2 and the first-run card come from the kit.
+
+```tsx
+import { AppTours, TourButton } from '@dloizides/ui-tour/expo';
+import { TOURS } from '../tours';
+
+<AppTours tours={TOURS} translate={FM} theme={theme} user={user} vars={vars}>
+  <Stack />
+</AppTours>;
+
+<TourButton />
+```
+
+| Prop | What it is |
+|---|---|
+| `tours` | Key-based tours: `title`, `category` and each step `text` are translation keys |
+| `translate` | The app translate function (`FM`); a missing key keeps the English default |
+| `theme` | The app theme (`colors`, `palette.primary`, `mode?`, `typography?`); `dark?` overrides the mode |
+| `user`, `vars`, `allowWrites`, `onEvent` | As on `TourProvider`; events also go to Umami (`window.umami.track`, tour id and mode only) |
+| `navigate` | Overrides `useRouter().push` |
+| `labelPrefix` | Label keys root, default `tours.labels` (`tours.labels.next`, `tours.labels.takeTour`, ...) |
+
+`TourButton` is the "Take a tour" button for the shell help slot (44 px hit box, `tours.labels.takeTour` / `takeTourHint`).
+
+### Add a tour in 3 steps
+
+1. Add the tour to `src/tours/`: an `id`, a `title` key, a `category` key and its steps.
+2. Add every text key to `src/localization/locales/en.json`.
+3. Run the jest check and the Auto E2E spec below.
+
+### Step fields
+
+| Field | Meaning |
+|---|---|
+| `target` | A testID (`open-payees`) or `{ role, name, nth?, exact?, within? }` |
+| `text` | Translation key of the caption text; `{name}` placeholders come from `vars` |
+| `action` | `StepAction.Click`, `Type` (needs `value`) or `None` |
+| `route?` | Navigates there first |
+| `optional?` | Skipped when the target is absent |
+| `wait?` | Extra wait in ms before the step |
+
+### Forbidden actions
+
+A click step whose target name starts with Save, Submit, Approve, Reject, Delete, Reset, Pay or Send is never performed. A plain "Save" is allowed only with `allowSave: true` on the tour and `allowWrites` on the provider. Switches, checkboxes and radios are settings, not writes.
+
+### How to test
+
+```ts
+import { expectValidTours } from '@dloizides/ui-tour/testing';
+import en from '../localization/locales/en.json';
+
+it('every tour is valid', () => expectValidTours(TOURS, en));
+```
+
+It fails on a missing text key, a malformed target, a repeated id, a tour without steps or a click on a write control.
+
+```ts
+import { expectAllToursPlay } from '@dloizides/ui-tour/playwright';
+
+test('every tour plays to the end in Auto', async ({ page }) => expectAllToursPlay(page));
+```
+
+It plays every tour in the picker in Auto and fails with `tour <id> step <n>/<m>: <reason>` (target missing, stuck, closed early, never started). The caption carries `data-tour-id`, `data-tour-step` and `data-tour-steps` for runners. `expo-router` and `@playwright/test` are optional peers.
 
 ## License
 

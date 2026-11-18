@@ -48,7 +48,7 @@ export function TourCaption(): ReactElement | null {
   const missing = view.phase === StepPhase.Missing;
   const note = noteFor(tour);
   return (
-    <div ref={ref} role="dialog" aria-live="polite" aria-label={current.title} data-testid="tour-caption" style={captionStyle(theme, position)}>
+    <div ref={ref} role="dialog" aria-live="polite" aria-label={current.title} data-testid="tour-caption" data-tour-id={current.id} data-tour-step={stepIndex + 1} data-tour-steps={current.steps.length} style={captionStyle(theme, position)}>
       <div style={metaStyle(theme)}>{formatLabel(labels.captionMeta, current.title, stepIndex + 1, current.steps.length, modeName(tour, active.mode))}</div>
       <div data-testid="tour-text">{substitute(step.text, tour.vars)}</div>
       {note !== '' ? <div data-testid="tour-note" style={noteStyle(theme)}>{note}</div> : null}

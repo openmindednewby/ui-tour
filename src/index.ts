@@ -12,6 +12,7 @@ export { isForbiddenClick } from './dom/forbidden';
 export { defaultTourLabels, formatLabel } from './labels';
 export type { TourLabels } from './labels';
 export { DEFAULT_TIMING } from './constants';
+export { fontStack } from './fontStack';
 export { TourMode } from './enums/TourMode';
 export { StepAction } from './enums/StepAction';
 export { TargetRole } from './enums/TargetRole';

@@ -7,6 +7,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
     '^react-native$': 'react-native-web',
+    '^@dloizides/ui-tour$': '<rootDir>/src/index.ts',
+    '^expo-router$': '<rootDir>/jest/expoRouterMock.js',
   },
   collectCoverageFrom: [
     'src/**/*.ts',
