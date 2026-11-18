@@ -113,6 +113,11 @@ export async function playAllToursInAuto(page: TourPage, options: PlayToursOptio
 
 /** One-line spec body: plays every tour in Auto and throws `tour <id> step <n>/<m>: <reason>` for each failure. */
 export async function expectAllToursPlay(page: TourPage, options: PlayToursOptions = {}): Promise<void> {
+  await showPicker(page, options);
+  const listed = await listTourIds(page);
+  if (listed.length === 0) throw new Error('No tours found in the picker: was the app mounted before the picker opened?');
+  const missing = (options.ids ?? []).filter((id) => !listed.includes(id));
+  if (missing.length > 0) throw new Error(`Tours not in the picker: ${missing.join(', ')}`);
   const failures = (await playAllToursInAuto(page, options)).filter((run) => !run.passed).map((run) => run.message ?? run.tourId);
   if (failures.length > 0) throw new Error(`Tours failed in Auto:\n${failures.join('\n')}`);
 }

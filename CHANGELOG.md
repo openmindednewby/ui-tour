@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+
+- `expectAllToursPlay` fails when the picker lists no tours (app not mounted before F2) and when `ids` names a tour the picker does not list.
+
 ## 1.1.0
 
 - `@dloizides/ui-tour/expo`: `AppTours` (one-line setup: expo-router navigate, theme adapter `toTourTheme`, translated labels, Umami events, picker, first-run card) and `TourButton` ("Take a tour").

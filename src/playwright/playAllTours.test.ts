@@ -103,3 +103,21 @@ describe('expectAllToursPlay', () => {
     await expect(run).rejects.toThrow('tour payees step 1/3: target missing');
   });
 });
+
+describe('expectAllToursPlay picker contents', () => {
+  it('with zero tours in the picker, throws that no tours were found', async () => {
+    const page = fakePage([], []);
+
+    const run = expectAllToursPlay(page, { pollMs: 1 });
+
+    await expect(run).rejects.toThrow('No tours found in the picker');
+  });
+
+  it('with ids naming a tour the picker does not list, throws naming that id', async () => {
+    const page = fakePage(['payees'], [{ step: 1, steps: 1 }, {}, {}]);
+
+    const run = expectAllToursPlay(page, { pollMs: 1, ids: ['payees', 'invoices'] });
+
+    await expect(run).rejects.toThrow('Tours not in the picker: invoices');
+  });
+});
