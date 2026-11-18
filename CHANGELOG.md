@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2
+
+- `toTourTheme` treats a theme as dark when its `mode` is `dark` or its background luminance is below 0.2 (design-tokens `toUiTheme` sets no `mode`), and the scrim dims with the darker of text and background. Fixes the light-grey dimmed page behind a tour in kefi dark.
+
 ## 1.2.1
 
 - `toTourTheme` no longer trusts tokens to be contrast-safe: `onAccent` is white or the background, whichever contrasts more with the accent fill; the new optional `accentText` slot (step label, note, picker item) is the first primary shade reaching 4.5:1 on the caption surface (lighter first in dark, darker first in light), else the text colour. Fixes kefi dark (Next 3.05:1, label 2.75:1).
