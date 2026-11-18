@@ -128,4 +128,23 @@ describe('toTourTheme contrast', () => {
 
     expect(tour.scrim).toBe('color-mix(in srgb, #1a1a1a 62%, transparent)');
   });
+
+  it('with the kefi dark toUiTheme output that has no primary 300, uses primary 500 as the accent with white ink', () => {
+    const kefiDark = {
+      colors: { background: '#141018', surface: '#1e1922', surfaceElevated: '#282130', text: '#f7f3ec', textSecondary: '#b3aab8', border: '#34303a' },
+      palette: { primary: { '100': '#c42b22', '500': '#c42b22', '700': '#c42b22' } },
+    };
+
+    const tour = toTourTheme(kefiDark);
+
+    expect([tour.accent, tour.onAccent]).toEqual(['#c42b22', 'white']);
+  });
+
+  it('in dark with only a base primary, uses the base as the accent', () => {
+    const theme: AppThemeSource = { ...base, mode: 'dark', palette: { primary: { base: '#c42b22' } } };
+
+    const tour = toTourTheme(theme);
+
+    expect(tour.accent).toBe('#c42b22');
+  });
 });

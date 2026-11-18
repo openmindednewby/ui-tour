@@ -16,7 +16,7 @@ export interface AppThemeColors {
 
 export interface AppThemeSource {
   colors: AppThemeColors;
-  palette: { primary: { '300'?: string; '500'?: string; '600'?: string; '700'?: string } };
+  palette: { primary: { '300'?: string; '400'?: string; '500'?: string; '600'?: string; '700'?: string; base?: string } };
   mode?: string;
   typography?: { fontFamily?: string };
 }
@@ -43,7 +43,8 @@ export function toTourTheme(theme: AppThemeSource, dark?: boolean): TourTheme {
   const isDark = dark ?? (theme.mode === DARK_MODE || hasDarkBackground(theme.colors.background));
   const { colors, palette } = theme;
   const lightAccent = palette.primary['700'] ?? palette.primary['600'] ?? palette.primary['500'] ?? colors.text;
-  const accent = isDark ? palette.primary['300'] ?? colors.text : lightAccent;
+  const darkAccent = palette.primary['300'] ?? palette.primary['400'] ?? palette.primary['500'] ?? palette.primary.base ?? colors.text;
+  const accent = isDark ? darkAccent : lightAccent;
   const shade = darkerOf(colors.text, colors.background, isDark ? colors.background : colors.text);
   const surface = colors.surfaceElevated ?? colors.surface;
   return {
