@@ -1,6 +1,6 @@
 {
     "name": "@dloizides/ui-tour",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "In-app guided tours for React Native Web apps: Guide me, Show me and Auto modes with a themed ring, caption, cursor, tour picker and first-run offer. Write controls are never clicked. Web only; renders nothing on native.",
     "keywords": [
         "react",
