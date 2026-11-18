@@ -23,7 +23,7 @@ export interface TourEngineOptions {
 
 export function useTourEngine(options: TourEngineOptions): TourContextValue {
   const controls = useTourControls(options);
-  const runner = useStepRunner({ ...options, active: controls.active, onSkip: controls.next });
+  const runner = useStepRunner({ ...options, active: controls.active, onSkip: controls.skipOptional });
   const action = stepOf(options.tours, controls.active)?.action ?? null;
   useTourKeys(controls);
   useAutoAdvance(controls.active, runner.view.phase, controls.paused, options.timing.autoMs, controls.next);

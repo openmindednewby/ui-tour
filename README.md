@@ -59,7 +59,7 @@ Open the picker from a Help menu with `useTour().openPicker()`; F2 opens it anyw
 | `findTarget`, `isForbiddenClick` | The element finder and the write-control rule used by the engine |
 | `defaultTourLabels`, `formatLabel` | English defaults; pass translated `labels` (placeholders `{{p1}}`, `{{p2}}`) |
 
-A step target is a testID string (`data-testid`) or `{ role, name, nth?, exact?, within? }` with role `button`, `heading`, `group`, `field` or `text`. `{name}` placeholders in a step are filled from `vars`.
+A step target is a testID string (`data-testid`) or `{ role, name, nth?, exact?, within? }` with role `button`, `heading`, `group`, `field` or `text`. `{name}` placeholders in a step's `text`, `value` and `route` are filled from `vars`.
 
 ### Theme
 
@@ -114,7 +114,7 @@ import { TOURS } from '../tours';
 | `target` | A testID (`open-payees`) or `{ role, name, nth?, exact?, within? }` |
 | `text` | Translation key of the caption text; `{name}` placeholders come from `vars` |
 | `action` | `StepAction.Click`, `Type` (needs `value`) or `None` |
-| `route?` | Navigates there first |
+| `route?` | Navigates there first; `{name}` placeholders come from `vars` (`/t/{tenantSlug}/register`) |
 | `optional?` | Skipped when the target is absent |
 | `wait?` | Extra wait in ms before the step |
 
@@ -131,7 +131,7 @@ import en from '../localization/locales/en.json';
 it('every tour is valid', () => expectValidTours(TOURS, en));
 ```
 
-It fails on a missing text key, a malformed target, a repeated id, a tour without steps or a click on a write control.
+It fails on a missing text key, a malformed target, a repeated id, a tour without steps, a click on a write control or a route placeholder that `vars` does not fill. Pass the vars your routes use: `expectValidTours(TOURS, en, { tenantSlug: 'demo' })`.
 
 ```ts
 import { expectAllToursPlay } from '@dloizides/ui-tour/playwright';
@@ -139,7 +139,7 @@ import { expectAllToursPlay } from '@dloizides/ui-tour/playwright';
 test('every tour plays to the end in Auto', async ({ page }) => expectAllToursPlay(page));
 ```
 
-It plays every tour in the picker in Auto and fails with `tour <id> step <n>/<m>: <reason>` (target missing, stuck, closed early, never started). The caption carries `data-tour-id`, `data-tour-step` and `data-tour-steps` for runners. `expo-router` and `@playwright/test` are optional peers.
+It plays every tour in the picker in Auto and fails with `tour <id> step <n>/<m>: <reason>` (target missing, stuck, closed early, never started). The caption carries `data-tour-id`, `data-tour-step`, `data-tour-steps` and `data-tour-skipped` (optional steps the engine skipped this run) for runners; `tour_finish` events carry the same `skipped` count. A tour that skipped more than `maxSkippedRatio` x its steps (default 0.25) fails: `expectAllToursPlay(page, { maxSkippedRatio: 0.5 })`. `expo-router` and `@playwright/test` are optional peers.
 
 ## License
 

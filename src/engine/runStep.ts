@@ -53,7 +53,8 @@ async function perform(context: StepRunContext, node: Element): Promise<StepOutc
 
 export async function runStep(context: StepRunContext): Promise<StepOutcome> {
   const { step } = context;
-  if (step.route !== undefined && context.getPathname() !== step.route) context.navigate(step.route);
+  const route = step.route === undefined ? undefined : substitute(step.route, context.vars);
+  if (route !== undefined && context.getPathname() !== route) context.navigate(route);
   const node = await waitForTarget(step.target, context.vars, step.wait ?? context.timing.waitMs, context.isCancelled);
   if (context.isCancelled()) return CANCELLED;
   if (node === null) return { kind: step.optional === true ? StepOutcomeKind.Skip : StepOutcomeKind.Missing };

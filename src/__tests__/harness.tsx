@@ -7,7 +7,7 @@ import { useTour } from '../context/TourContext';
 import type { TourContextValue } from '../context/TourContext';
 import { StepAction } from '../enums/StepAction';
 import { TargetRole } from '../enums/TargetRole';
-import type { Tour, TourEvent, TourTheme, TourTiming, TourUser } from '../types';
+import type { Tour, TourEvent, TourTheme, TourTiming, TourUser, TourVars } from '../types';
 
 export const testTheme: TourTheme = {
   accent: 'darkorange',
@@ -64,6 +64,8 @@ export interface HarnessOptions {
   user?: TourUser | null;
   withPicker?: boolean;
   withOffer?: boolean;
+  tours?: Tour[];
+  vars?: TourVars;
 }
 
 export interface Harness {
@@ -99,7 +101,8 @@ export function renderTour(options: HarnessOptions = {}): Harness {
   }
   const view = render(
     <TourProvider
-      tours={testTours}
+      tours={options.tours ?? testTours}
+      vars={options.vars}
       navigate={options.navigate ?? ignoreRoute}
       getPathname={rootPath}
       theme={testTheme}

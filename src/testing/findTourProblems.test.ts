@@ -80,6 +80,24 @@ describe('findTourProblems', () => {
   });
 });
 
+describe('findTourProblems route vars', () => {
+  it('with a route placeholder that vars does not fill, reports the var', () => {
+    const tours = [tourWith({ steps: [{ route: '/t/{tenantSlug}/register', target: 'open-payees', text: 'tours.payees.open', action: StepAction.None }] })];
+
+    const problems = findTourProblems(tours, translations, {});
+
+    expect(problems).toEqual(['tour payees step 1: route var "{tenantSlug}" is not in vars']);
+  });
+
+  it('with a route placeholder that vars fills, finds nothing', () => {
+    const tours = [tourWith({ steps: [{ route: '/t/{tenantSlug}/register', target: 'open-payees', text: 'tours.payees.open', action: StepAction.None }] })];
+
+    const problems = findTourProblems(tours, translations, { tenantSlug: 'demo' });
+
+    expect(problems).toEqual([]);
+  });
+});
+
 describe('expectValidTours', () => {
   it('with a problem, throws listing it', () => {
     const tours = [tourWith({ title: 'tours.payees.none' })];

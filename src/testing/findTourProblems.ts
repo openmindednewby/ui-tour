@@ -1,10 +1,11 @@
 import { isForbiddenClick, StepAction, TargetRole, validateTours } from '@dloizides/ui-tour';
-import type { StepTarget, Tour, TourStep } from '@dloizides/ui-tour';
+import type { StepTarget, Tour, TourStep, TourVars } from '@dloizides/ui-tour';
 
 export type Translations = Readonly<Record<string, unknown>>;
 
 const TEST_ID = /^[A-Za-z0-9][\w.:-]*$/;
 const TEST_ID_SEPARATOR = /[-_.:]/;
+const ROUTE_VAR = /\{(\w+)\}/g;
 const ROLES = new Set<string>(Object.values(TargetRole));
 
 function lookup(translations: Translations, key: string): unknown {
@@ -35,22 +36,29 @@ function writeProblem(where: string, tour: Tour, step: TourStep): string[] {
   return name === undefined ? [] : [`${where}: clicks write control "${name}"`];
 }
 
-function tourProblems(tour: Tour, translations: Translations): string[] {
+function routeProblems(where: string, step: TourStep, vars: TourVars): string[] {
+  if (step.route === undefined) return [];
+  return Array.from(step.route.matchAll(ROUTE_VAR))
+    .filter(([, key]) => key === undefined || vars[key] === undefined)
+    .map(([placeholder]) => `${where}: route var "${placeholder}" is not in vars`);
+}
+
+function tourProblems(tour: Tour, translations: Translations, vars: TourVars): string[] {
   const problems = [...keyProblem(translations, `tour ${tour.id}`, 'title', tour.title), ...keyProblem(translations, `tour ${tour.id}`, 'category', tour.category)];
   (Array.isArray(tour.steps) ? tour.steps : []).forEach((step, index) => {
     const where = `tour ${tour.id} step ${index + 1}`;
-    problems.push(...keyProblem(translations, where, 'text', step.text), ...targetProblems(where, step.target), ...writeProblem(where, tour, step));
+    problems.push(...keyProblem(translations, where, 'text', step.text), ...targetProblems(where, step.target), ...writeProblem(where, tour, step), ...routeProblems(where, step, vars));
   });
   return problems;
 }
 
-/** Lists every problem in key-based tour data: shape errors, missing translation keys, malformed targets, write-control clicks. */
-export function findTourProblems(tours: readonly Tour[], translations: Translations): string[] {
-  return [...validateTours(tours).errors, ...tours.flatMap((tour) => tourProblems(tour, translations))];
+/** Lists every problem in key-based tour data: shape errors, missing translation keys, malformed targets, write-control clicks, route vars `vars` does not fill. */
+export function findTourProblems(tours: readonly Tour[], translations: Translations, vars: TourVars = {}): string[] {
+  return [...validateTours(tours).errors, ...tours.flatMap((tour) => tourProblems(tour, translations, vars))];
 }
 
 /** Throws one error listing every problem `findTourProblems` finds; call it from a jest test. */
-export function expectValidTours(tours: readonly Tour[], translations: Translations): void {
-  const problems = findTourProblems(tours, translations);
+export function expectValidTours(tours: readonly Tour[], translations: Translations, vars: TourVars = {}): void {
+  const problems = findTourProblems(tours, translations, vars);
   if (problems.length > 0) throw new Error(`Invalid tours:\n${problems.join('\n')}`);
 }

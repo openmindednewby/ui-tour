@@ -6,6 +6,7 @@ interface Frame {
   step?: number;
   steps?: number;
   skip?: boolean;
+  skipped?: number;
   vanishOnRead?: boolean;
 }
 
@@ -28,6 +29,7 @@ function fakePage(ids: string[], frames: Frame[]): TourPage {
     getAttribute: async (name: string) => {
       if (name === 'data-testid') return `tour-start-${ids[nth]}-auto`;
       if (frame().vanishOnRead === true) throw new Error('Timeout 250ms exceeded');
+      if (name === 'data-tour-skipped') return frame().skipped === undefined ? null : String(frame().skipped);
       return String(name === 'data-tour-step' ? frame().step : frame().steps);
     },
     nth: (position: number) => locator(selector, position),
@@ -58,7 +60,7 @@ describe('playAllToursInAuto', () => {
 
     const results = await playAllToursInAuto(page, { pollMs: 1 });
 
-    expect(results).toEqual([{ tourId: 'payees', passed: true, step: 2, steps: 2 }]);
+    expect(results).toEqual([{ tourId: 'payees', passed: true, step: 2, steps: 2, skipped: 0 }]);
   });
 
   it('when the caption unmounts between the count and the attribute read, keeps polling and passes', async () => {
@@ -66,7 +68,7 @@ describe('playAllToursInAuto', () => {
 
     const results = await playAllToursInAuto(page, { pollMs: 1 });
 
-    expect(results).toEqual([{ tourId: 'payees', passed: true, step: 2, steps: 2 }]);
+    expect(results).toEqual([{ tourId: 'payees', passed: true, step: 2, steps: 2, skipped: 0 }]);
   });
 
   it('when a required target is missing, fails at that step', async () => {
@@ -101,6 +103,34 @@ describe('expectAllToursPlay', () => {
     const run = expectAllToursPlay(page, { pollMs: 1 });
 
     await expect(run).rejects.toThrow('tour payees step 1/3: target missing');
+  });
+});
+
+describe('playAllToursInAuto skipped steps', () => {
+  it('when the caption reports skipped optional steps, returns the engine count', async () => {
+    const page = fakePage(['payees'], [{ step: 1, steps: 4, skipped: 0 }, { step: 4, steps: 4, skipped: 2 }, {}, {}]);
+
+    const results = await playAllToursInAuto(page, { pollMs: 1 });
+
+    expect(results[0].skipped).toBe(2);
+  });
+});
+
+describe('expectAllToursPlay skipped ratio', () => {
+  it('with more skipped steps than the default ratio allows, throws naming the tour', async () => {
+    const page = fakePage(['payees'], [{ step: 1, steps: 4, skipped: 0 }, { step: 4, steps: 4, skipped: 2 }, {}, {}]);
+
+    const run = expectAllToursPlay(page, { pollMs: 1 });
+
+    await expect(run).rejects.toThrow('tour payees: skipped 2 of 4 steps (max 25%)');
+  });
+
+  it('with skipped steps within maxSkippedRatio, passes', async () => {
+    const page = fakePage(['payees'], [{ step: 1, steps: 4, skipped: 0 }, { step: 4, steps: 4, skipped: 2 }, {}, {}]);
+
+    const run = expectAllToursPlay(page, { pollMs: 1, maxSkippedRatio: 0.5 });
+
+    await expect(run).resolves.toBeUndefined();
   });
 });
 

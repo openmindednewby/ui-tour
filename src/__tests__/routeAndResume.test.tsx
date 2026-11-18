@@ -1,4 +1,5 @@
 import { act, screen, waitFor } from '@testing-library/react';
+import { StepAction } from '../enums/StepAction';
 import { TourMode } from '../enums/TourMode';
 import { SESSION_KEY } from '../engine/tourSession';
 import { renderTour } from './harness';
@@ -43,5 +44,15 @@ describe('TourProvider routes and resume', () => {
     renderTour();
 
     expect(screen.queryByTestId('tour-caption')).toBeNull();
+  });
+
+  it('with a vars placeholder in a step route, navigates to the filled route', async () => {
+    const navigate = jest.fn();
+    const tours = [{ id: 'join', title: 'Join', category: 'Start', steps: [{ route: '/t/{tenantSlug}/register', target: 'open-payees', text: 'Register here', action: StepAction.None }] }];
+    const harness = renderTour({ navigate, tours, vars: { tenantSlug: 'demo' } });
+
+    act(() => harness.tour().start('join', TourMode.Guide));
+
+    await waitFor(() => expect(navigate.mock.calls).toEqual([['/t/demo/register']]));
   });
 });

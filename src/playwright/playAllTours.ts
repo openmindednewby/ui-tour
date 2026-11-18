@@ -12,11 +12,14 @@ const GONE_POLLS = 2;
 const DEFAULT_STEP_TIMEOUT_MS = 30000;
 const DEFAULT_POLL_MS = 250;
 const READ_TIMEOUT_MS = 250;
+const DEFAULT_MAX_SKIPPED_RATIO = 0.25;
+const PERCENT = 100;
 
 interface RunState {
   seen: boolean;
   step: number;
   steps: number;
+  skipped: number;
   sinceChangeMs: number;
   gonePolls: number;
 }
@@ -52,8 +55,8 @@ async function listTourIds(page: TourPage): Promise<string[]> {
 }
 
 function result(tourId: string, state: RunState, reason?: TourRunFailure): TourRunResult {
-  if (reason === undefined) return { tourId, passed: true, step: state.step, steps: state.steps };
-  return { tourId, passed: false, step: state.step, steps: state.steps, reason, message: tourFailure(tourId, state.step, state.steps, reason) };
+  if (reason === undefined) return { tourId, passed: true, step: state.step, steps: state.steps, skipped: state.skipped };
+  return { tourId, passed: false, step: state.step, steps: state.steps, skipped: state.skipped, reason, message: tourFailure(tourId, state.step, state.steps, reason) };
 }
 
 /** Reads a numeric caption attribute; null when the caption unmounted between the count and the read. */
@@ -79,6 +82,7 @@ async function observe(page: TourPage, tourId: string, state: RunState, timeoutM
   const steps = await readNumber(page, 'data-tour-steps');
   if (step === null || steps === null) return null;
   state.steps = steps;
+  state.skipped = (await readNumber(page, 'data-tour-skipped')) ?? state.skipped;
   if (!state.seen || step !== state.step) {
     state.seen = true;
     state.step = step;
@@ -93,13 +97,17 @@ async function playOne(page: TourPage, tourId: string, options: PlayToursOptions
   const pollMs = options.pollMs ?? DEFAULT_POLL_MS;
   await showPicker(page, options);
   await page.locator(`[data-testid="${START_PREFIX}${tourId}${AUTO_SUFFIX}"]`).click();
-  const state: RunState = { seen: false, step: 0, steps: 0, sinceChangeMs: 0, gonePolls: 0 };
+  const state: RunState = { seen: false, step: 0, steps: 0, skipped: 0, sinceChangeMs: 0, gonePolls: 0 };
   for (;;) {
     const outcome = await observe(page, tourId, state, timeoutMs);
     if (outcome !== null) return outcome;
     await page.waitForTimeout(pollMs);
     state.sinceChangeMs += pollMs;
   }
+}
+
+function skippedFailure(run: TourRunResult, maxRatio: number): string {
+  return `tour ${run.tourId}: skipped ${run.skipped} of ${run.steps} steps (max ${Math.round(maxRatio * PERCENT)}%)`;
 }
 
 /** Plays every tour in the picker (or `ids`) in Auto mode, one after another, and reports how far each got. */
@@ -118,6 +126,9 @@ export async function expectAllToursPlay(page: TourPage, options: PlayToursOptio
   if (listed.length === 0) throw new Error('No tours found in the picker: was the app mounted before the picker opened?');
   const missing = (options.ids ?? []).filter((id) => !listed.includes(id));
   if (missing.length > 0) throw new Error(`Tours not in the picker: ${missing.join(', ')}`);
-  const failures = (await playAllToursInAuto(page, options)).filter((run) => !run.passed).map((run) => run.message ?? run.tourId);
+  const maxRatio = options.maxSkippedRatio ?? DEFAULT_MAX_SKIPPED_RATIO;
+  const runs = await playAllToursInAuto(page, options);
+  const failures = runs.filter((run) => !run.passed).map((run) => run.message ?? run.tourId);
+  failures.push(...runs.filter((run) => run.passed && run.skipped > maxRatio * run.steps).map((run) => skippedFailure(run, maxRatio)));
   if (failures.length > 0) throw new Error(`Tours failed in Auto:\n${failures.join('\n')}`);
 }

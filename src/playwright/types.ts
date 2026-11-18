@@ -19,6 +19,7 @@ export interface PlayToursOptions {
   openPicker?: (page: TourPage) => Promise<void>;
   stepTimeoutMs?: number;
   pollMs?: number;
+  maxSkippedRatio?: number;
 }
 
 export interface TourRunResult {
@@ -26,6 +27,7 @@ export interface TourRunResult {
   passed: boolean;
   step: number;
   steps: number;
+  skipped: number;
   reason?: TourRunFailure;
   message?: string;
 }

@@ -15,8 +15,10 @@ export interface TourControls {
   active: ActiveTour | null;
   paused: boolean;
   pickerOpen: boolean;
+  skipped: number;
   start: (tourId: string, mode: TourMode) => void;
   next: () => void;
+  skipOptional: () => void;
   back: () => void;
   end: () => void;
   togglePause: () => void;
@@ -28,6 +30,8 @@ export function useTourControls(options: ControlsOptions): TourControls {
   const [active, setActiveState] = useState<ActiveTour | null>(() => loadSession(options.tours));
   const [paused, setPaused] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [skipped, setSkipped] = useState(0);
+  const skippedSteps = useRef(new Set<number>());
   const activeRef = useRef(active);
   const optionsRef = useRef(options);
   optionsRef.current = options;
@@ -42,7 +46,8 @@ export function useTourControls(options: ControlsOptions): TourControls {
     const current = activeRef.current;
     if (current === null) return;
     const { onEvent, user } = optionsRef.current;
-    onEvent?.({ type, tourId: current.tourId, mode: current.mode });
+    const event = { type, tourId: current.tourId, mode: current.mode };
+    onEvent?.(type === TourEventType.Finish ? { ...event, skipped: skippedSteps.current.size } : event);
     if (type === TourEventType.Finish && user !== null) markOfferSeen(user.id);
     setPaused(false);
     setActive(null);
@@ -52,6 +57,8 @@ export function useTourControls(options: ControlsOptions): TourControls {
     if (!optionsRef.current.tours.some((tour) => tour.id === tourId)) return;
     setPickerOpen(false);
     setPaused(false);
+    skippedSteps.current = new Set();
+    setSkipped(0);
     setActive({ tourId, step: 0, mode });
     optionsRef.current.onEvent?.({ type: TourEventType.Start, tourId, mode });
   }, [setActive]);
@@ -64,6 +71,14 @@ export function useTourControls(options: ControlsOptions): TourControls {
     else setActive({ ...current, step: current.step + 1 });
   }, [close, setActive]);
 
+  const skipOptional = useCallback(() => {
+    const current = activeRef.current;
+    if (current === null) return;
+    skippedSteps.current.add(current.step);
+    setSkipped(skippedSteps.current.size);
+    next();
+  }, [next]);
+
   const back = useCallback(() => {
     const current = activeRef.current;
     if (current !== null && current.step > 0) setActive({ ...current, step: current.step - 1 });
@@ -74,5 +89,5 @@ export function useTourControls(options: ControlsOptions): TourControls {
   const openPicker = useCallback(() => setPickerOpen(true), []);
   const closePicker = useCallback(() => setPickerOpen(false), []);
 
-  return { active, paused, pickerOpen, start, next, back, end, togglePause, openPicker, closePicker };
+  return { active, paused, pickerOpen, skipped, start, next, skipOptional, back, end, togglePause, openPicker, closePicker };
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+
+- `vars` placeholders are filled in a step's `route` too (`/t/{tenantSlug}/register`). `expectValidTours(tours, translations, vars)` reports a route placeholder that `vars` does not fill.
+- The engine counts the optional steps it skipped in a run: the caption carries `data-tour-skipped`, and `tour_finish` carries `skipped` (a number, no PII).
+- `playAllToursInAuto` reads that count into `TourRunResult.skipped`; `expectAllToursPlay` fails a tour that skipped more than `maxSkippedRatio` x steps (default 0.25).
+
 ## 1.1.2
 
 - `expectAllToursPlay` fails when the picker lists no tours (app not mounted before F2) and when `ids` names a tour the picker does not list.

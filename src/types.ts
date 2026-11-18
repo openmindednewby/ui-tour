@@ -37,6 +37,7 @@ export interface TourEvent {
   type: TourEventType;
   tourId: string;
   mode: TourMode;
+  skipped?: number;
 }
 
 export interface TourUser {
