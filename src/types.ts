@@ -49,6 +49,7 @@ export type TourVars = Record<string, string | undefined>;
 export interface TourTheme {
   accent: string;
   onAccent: string;
+  accentText?: string;
   surface: string;
   onSurface: string;
   muted: string;

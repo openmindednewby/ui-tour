@@ -48,11 +48,11 @@ export function captionStyle(theme: TourTheme, position: Position): CSSPropertie
 }
 
 export function metaStyle(theme: TourTheme): CSSProperties {
-  return { color: theme.accent, fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 6 };
+  return { color: theme.accentText ?? theme.accent, fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 6 };
 }
 
 export function noteStyle(theme: TourTheme): CSSProperties {
-  return { color: theme.accent, fontSize: 14, marginTop: 6 };
+  return { color: theme.accentText ?? theme.accent, fontSize: 14, marginTop: 6 };
 }
 
 export function rowStyle(theme: TourTheme): CSSProperties {

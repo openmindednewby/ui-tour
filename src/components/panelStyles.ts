@@ -43,7 +43,7 @@ export function groupButtonStyle(theme: TourTheme): CSSProperties {
     borderTop: `1px solid ${theme.divider}`,
     marginTop: 8,
     padding: '12px 0',
-    color: theme.accent,
+    color: theme.accentText ?? theme.accent,
     fontFamily: fontStack(theme.fontFamily),
     fontSize: 16,
     fontWeight: 700,

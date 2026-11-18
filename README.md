@@ -65,7 +65,7 @@ A step target is a testID string (`data-testid`) or `{ role, name, nth?, exact?,
 
 Every colour comes from the `theme` prop; map it from your design tokens or tenant theme:
 
-`accent`, `onAccent`, `surface`, `onSurface`, `muted`, `scrim`, `divider`, `radius`, `fontFamily`. The font always falls back to `sans-serif` (`fontStack`).
+`accent`, `onAccent`, `accentText` (optional; accent-coloured text on the caption, defaults to `accent`), `surface`, `onSurface`, `muted`, `scrim`, `divider`, `radius`, `fontFamily`. The font always falls back to `sans-serif` (`fontStack`). `toTourTheme` (`/expo`) measures contrast instead of trusting tokens: `onAccent` is white or the background, whichever contrasts more with the accent; `accentText` is the first primary shade reaching 4.5:1 on the caption (lighter first in dark), else the text colour.
 
 ### Events
 

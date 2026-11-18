@@ -1,6 +1,8 @@
 import { fontStack } from '@dloizides/ui-tour';
 import type { TourTheme } from '@dloizides/ui-tour';
 
+import { pickAccentText, pickOnAccent } from './accentInk';
+
 export interface AppThemeColors {
   background: string;
   surface: string;
@@ -29,10 +31,12 @@ export function toTourTheme(theme: AppThemeSource, dark?: boolean): TourTheme {
   const lightAccent = palette.primary['700'] ?? palette.primary['600'] ?? palette.primary['500'] ?? colors.text;
   const accent = isDark ? palette.primary['300'] ?? colors.text : lightAccent;
   const shade = isDark ? colors.background : colors.text;
+  const surface = colors.surfaceElevated ?? colors.surface;
   return {
     accent,
-    onAccent: isDark ? colors.background : colors.surface,
-    surface: colors.surfaceElevated ?? colors.surface,
+    onAccent: pickOnAccent(accent, colors.background, colors.surface, isDark ? colors.background : colors.surface),
+    accentText: pickAccentText(palette.primary, surface, colors.text, isDark, accent),
+    surface,
     onSurface: colors.text,
     muted: colors.textSecondary,
     scrim: `color-mix(in srgb, ${shade} ${SCRIM_STRENGTH}, transparent)`,
